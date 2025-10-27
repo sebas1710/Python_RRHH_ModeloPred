@@ -1,38 +1,70 @@
 import streamlit as st
 
 st.set_page_config(page_title="Simulador de Escenarios", page_icon="📊")
-st.title("📊 Simulador de Escenarios")
 
-# --- Escenario base ---
+# ====== Estilos (pill verde y layout compacto) ======
+st.markdown("""
+<style>
+.scenario-row { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+.badge { font-size:16px; }
+.pill {
+  background:#155d2b; color:#d1fae5; 
+  padding:8px 14px; border-radius:12px; font-weight:600;
+  display:inline-block;
+}
+.sep { height: 8px; }
+</style>
+""", unsafe_allow_html=True)
+
+# ====== Helpers ======
+def render_scenario(title: str, precio: float, cantidad: int, total: float):
+    st.subheader(title)
+    st.markdown(
+        f"""
+        <div class="scenario-row">
+          <div class="badge">💰 <b>Precio:</b> {precio}</div>
+          <div class="badge">📦 <b>Cantidad:</b> {cantidad}</div>
+          <div class="pill">Resultado: {total:,.1f} €</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="sep"></div>', unsafe_allow_html=True)
+
+# ====== Estado ======
+if "escenarios" not in st.session_state:
+    st.session_state.escenarios = []  # [{precio: float, cantidad: int}]
+if "resultados" not in st.session_state:
+    st.session_state.resultados = []  # [{precio, cantidad, total}]
+if "mostrar_resultados" not in st.session_state:
+    st.session_state.mostrar_resultados = False
+
+# ====== Escenario base ======
 PRECIO_DEF = 10.0
 CANT_DEF   = 200
+TOTAL_DEF  = PRECIO_DEF * CANT_DEF
 
-resultado_base = PRECIO_DEF * CANT_DEF
-st.subheader("Escenario base")
-st.write(f"💰 Precio: {PRECIO_DEF}")
-st.write(f"📦 Cantidad: {CANT_DEF}")
-st.success(f"Resultado: {resultado_base} €")
+render_scenario("Escenario base", PRECIO_DEF, CANT_DEF, TOTAL_DEF)
 
 st.markdown("---")
 
-# --- Estado: lista de escenarios ---
-if "escenarios" not in st.session_state:
-    st.session_state.escenarios = []  # cada item: {"precio": float, "cantidad": int}
-
-# --- Botones de control ---
+# ====== Controles ======
 c1, c2 = st.columns(2)
 with c1:
     if st.button("➕ Agregar nuevo escenario"):
         if len(st.session_state.escenarios) < 5:
             st.session_state.escenarios.append({"precio": PRECIO_DEF, "cantidad": CANT_DEF})
+            st.session_state.mostrar_resultados = False  # ocultar resultados hasta recalcular
         else:
             st.warning("Solo puedes agregar hasta 5 escenarios adicionales.")
 with c2:
     if st.button("🔄 Reiniciar escenarios"):
         st.session_state.escenarios = []
+        st.session_state.resultados = []
+        st.session_state.mostrar_resultados = False
         st.rerun()
 
-# --- Inputs de escenarios (editar sin duplicar) ---
+# ====== Inputs dinámicos ======
 if st.session_state.escenarios:
     st.subheader("Escenarios adicionales")
     for i, esc in enumerate(st.session_state.escenarios):
@@ -44,13 +76,24 @@ if st.session_state.escenarios:
         nueva_cant = colB.number_input(
             f"Cantidad {i+1}", min_value=0, value=int(esc["cantidad"]), key=f"cantidad_{i}"
         )
-        # Actualizamos en sitio, no hacemos append
         st.session_state.escenarios[i]["precio"] = nuevo_precio
         st.session_state.escenarios[i]["cantidad"] = nueva_cant
 
-    # --- Cálculo y salida ---
+# ====== Calcular y mostrar debajo del base con el mismo formato ======
+if st.session_state.escenarios:
     if st.button("🧮 Calcular nuevos escenarios"):
-        st.subheader("Resultados de los escenarios")
-        for i, esc in enumerate(st.session_state.escenarios):
-            total = esc["precio"] * esc["cantidad"]
-            st.write(f"**Escenario {i+1}:** {esc['precio']} × {esc['cantidad']} = ✅ **{total} €**")
+        st.session_state.resultados = [
+            {
+                "precio": e["precio"],
+                "cantidad": e["cantidad"],
+                "total": e["precio"] * e["cantidad"]
+            }
+            for e in st.session_state.escenarios
+        ]
+        st.session_state.mostrar_resultados = True
+
+# Mostrar resultados justo debajo del base (ya se pintó arriba), ahora listamos:
+if st.session_state.mostrar_resultados and st.session_state.resultados:
+    st.subheader("Resultados de los escenarios")
+    for i, r in enumerate(st.session_state.resultados, start=1):
+        render_scenario(f"Escenario {i}", r["precio"], r["cantidad"], r["total"])

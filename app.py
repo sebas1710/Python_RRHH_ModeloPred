@@ -7,21 +7,21 @@ st.set_page_config(page_title="Predicción de Fuga", page_icon="📉")
 # ====== ESTILOS ======
 st.markdown("""
 <style>
-.scenario-row { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
-.badge { font-size:16px; }
-.pill {
-  color:white;
-  padding:8px 14px;
-  border-radius:12px;
-  font-weight:600;
-  display:inline-block;
+[data-testid="stTable"] {
+    background-color: #ffffff;
+    color: #222;
+    border-radius: 12px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
+    border: none;
 }
-.pill-verde { background:#155d2b; }
-.pill-amarillo { background:#a87900; }
-.pill-rojo { background:#7a1111; }
-.sep { height: 8px; }
+[data-testid="stTable"] thead tr th {
+    background-color: #0094d4 !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 # ====== FUNCIONES ======
 def color_porcentaje(prob):

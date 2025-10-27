@@ -19,7 +19,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====== CARGAR CSV ======
-df = pd.read_csv("input/predicciones_fuga.csv")
+df = pd.read_csv("INPUT/predicciones_fuga.csv")
 
 # ====== BLOQUE SUPERIOR: SELECTORES ======
 st.title("📉 Modelo de Predicción de Fuga")

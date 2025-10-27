@@ -114,7 +114,12 @@ if not df_filtrado.empty:
         ])
     )
 
-    st.dataframe(styler, hide_index=True, use_container_width=True)
+    st.dataframe(
+    df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"]),
+    hide_index=True,
+    use_container_width=True
+    )
+
 
 # ====== ESCENARIO / RESUMEN ======
 st.markdown("---")

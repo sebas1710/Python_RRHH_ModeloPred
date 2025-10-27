@@ -50,7 +50,7 @@ def calcular_probabilidad(base, aumento_salarial, aumento_cargo):
     return max(min(nueva_prob, 1), 0)  # limitar entre 0 y 1
 
 # ====== CARGAR CSV ======
-df = pd.read_csv("INPUT/predicciones_fuga_actualizado.csv")
+df = pd.read_csv("INPUT/predicciones_fuga.csv")
 
 # ====== SELECTORES ======
 st.title("📉 Modelo de Predicción de Fuga")

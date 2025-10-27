@@ -114,12 +114,9 @@ if not df_filtrado.empty:
         ])
     )
 
-    st.dataframe(
-    df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"]),
-    hide_index=True,
-    use_container_width=True
-    )
-
+    # Mostrar tabla como HTML (mantiene estilos)
+    html_table = styler.to_html()
+    st.markdown(html_table, unsafe_allow_html=True)
 
 # ====== ESCENARIO / RESUMEN ======
 st.markdown("---")

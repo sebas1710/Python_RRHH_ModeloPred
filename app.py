@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Simulador de Escenarios", page_icon="📊")
 
-# ====== Estilos (pill verde y layout compacto) ======
+# ====== Estilos ======
 st.markdown("""
 <style>
 .scenario-row { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
@@ -16,7 +16,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ====== Helpers ======
+# ====== Helper para renderizar escenarios ======
 def render_scenario(title: str, precio: float, cantidad: int, total: float):
     st.subheader(title)
     st.markdown(
@@ -33,9 +33,9 @@ def render_scenario(title: str, precio: float, cantidad: int, total: float):
 
 # ====== Estado ======
 if "escenarios" not in st.session_state:
-    st.session_state.escenarios = []  # [{precio: float, cantidad: int}]
+    st.session_state.escenarios = []
 if "resultados" not in st.session_state:
-    st.session_state.resultados = []  # [{precio, cantidad, total}]
+    st.session_state.resultados = []
 if "mostrar_resultados" not in st.session_state:
     st.session_state.mostrar_resultados = False
 
@@ -46,18 +46,25 @@ TOTAL_DEF  = PRECIO_DEF * CANT_DEF
 
 render_scenario("Escenario base", PRECIO_DEF, CANT_DEF, TOTAL_DEF)
 
+# ====== Si hay resultados, los mostramos justo debajo del base ======
+if st.session_state.mostrar_resultados and st.session_state.resultados:
+    st.markdown("---")
+    st.subheader("Resultados de los escenarios")
+    for i, r in enumerate(st.session_state.resultados, start=1):
+        render_scenario(f"Escenario {i}", r["precio"], r["cantidad"], r["total"])
+
 st.markdown("---")
 
-# ====== Controles ======
-c1, c2 = st.columns(2)
-with c1:
+# ====== Botones principales ======
+col1, col2 = st.columns(2)
+with col1:
     if st.button("➕ Agregar nuevo escenario"):
         if len(st.session_state.escenarios) < 5:
             st.session_state.escenarios.append({"precio": PRECIO_DEF, "cantidad": CANT_DEF})
-            st.session_state.mostrar_resultados = False  # ocultar resultados hasta recalcular
+            st.session_state.mostrar_resultados = False
         else:
             st.warning("Solo puedes agregar hasta 5 escenarios adicionales.")
-with c2:
+with col2:
     if st.button("🔄 Reiniciar escenarios"):
         st.session_state.escenarios = []
         st.session_state.resultados = []
@@ -69,17 +76,17 @@ if st.session_state.escenarios:
     st.subheader("Escenarios adicionales")
     for i, esc in enumerate(st.session_state.escenarios):
         st.write(f"**Escenario {i+1}**")
-        colA, colB = st.columns(2)
-        nuevo_precio = colA.number_input(
+        c1, c2 = st.columns(2)
+        nuevo_precio = c1.number_input(
             f"Precio {i+1}", min_value=0.0, value=float(esc["precio"]), key=f"precio_{i}"
         )
-        nueva_cant = colB.number_input(
+        nueva_cant = c2.number_input(
             f"Cantidad {i+1}", min_value=0, value=int(esc["cantidad"]), key=f"cantidad_{i}"
         )
         st.session_state.escenarios[i]["precio"] = nuevo_precio
         st.session_state.escenarios[i]["cantidad"] = nueva_cant
 
-# ====== Calcular y mostrar debajo del base con el mismo formato ======
+# ====== Calcular resultados ======
 if st.session_state.escenarios:
     if st.button("🧮 Calcular nuevos escenarios"):
         st.session_state.resultados = [
@@ -91,9 +98,4 @@ if st.session_state.escenarios:
             for e in st.session_state.escenarios
         ]
         st.session_state.mostrar_resultados = True
-
-# Mostrar resultados justo debajo del base (ya se pintó arriba), ahora listamos:
-if st.session_state.mostrar_resultados and st.session_state.resultados:
-    st.subheader("Resultados de los escenarios")
-    for i, r in enumerate(st.session_state.resultados, start=1):
-        render_scenario(f"Escenario {i}", r["precio"], r["cantidad"], r["total"])
+        st.rerun()

@@ -70,7 +70,7 @@ def highlight_prob(val):
         return ""
 
 # ====== CARGAR CSV ======
-df = pd.read_csv("INPUT/predicciones_fuga_factores.csv")
+df = pd.read_csv("INPUT/predicciones_fuga.csv")
 
 # ====== TABS PRINCIPALES ======
 tab1, tab2 = st.tabs(["👤 Análisis por Persona", "🏢 Análisis del Área"])

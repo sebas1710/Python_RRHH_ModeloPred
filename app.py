@@ -84,38 +84,69 @@ if not df_filtrado.empty:
     st.subheader("📋 Datos filtrados")
     df_vista = df_filtrado[["Nombre", "Área", "Probabilidad_Fuga_Base"]].copy()
     df_vista["Probabilidad_Fuga_%"] = (df_vista["Probabilidad_Fuga_Base"] * 100).round(1)
-
-    def highlight_prob(val):
-        style = ""
+    
+    # Convertir DataFrame a HTML con estilos personalizados
+    def style_probabilidad(val):
         if val > 60:
-            style = "background-color:#ffb3b3; color:#000000"   # rojo claro, texto negro
+            return 'background-color: #ffb3b3; color: #000000;'
         elif val >= 40:
-            style = "background-color:#ffe699; color:#000000"   # amarillo, texto negro
+            return 'background-color: #ffe699; color: #000000;'
         else:
-            style = "background-color:#b7e1cd; color:#000000"   # verde, texto negro
-        return style
-
-    # Aplicar estilos a la tabla
-    styled_df = df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])\
-        .set_table_styles([
-            # Encabezados
-            {'selector': 'thead th',
-             'props': [('background-color', '#1f77b4'), 
-                      ('color', 'white'),
-                      ('font-weight', 'bold'),
-                      ('border', '1px solid white')]},
-            # Filas
-            {'selector': 'tbody tr',
-             'props': [('background-color', '#f8f9fa')]},
-            # Celdas del cuerpo
-            {'selector': 'tbody td',
-             'props': [('color', '#000000'),
-                      ('border', '1px solid #dee2e6')]},
-            # Hover effect
-            {'selector': 'tbody tr:hover',
-             'props': [('background-color', '#e9ecef')]}
-        ], overwrite=False)
-
+            return 'background-color: #b7e1cd; color: #000000;'
+    
+    # Aplicar estilos a la columna de probabilidad
+    styled_df = df_vista.style.format({
+        'Probabilidad_Fuga_Base': '{:.4f}',
+        'Probabilidad_Fuga_%': '{:.1f}'
+    })
+    
+    # Aplicar estilos usando set_properties
+    styled_df = styled_df.set_properties(
+        subset=['Probabilidad_Fuga_%'],
+        **{'background-color': '', 'color': ''}  # Reset primero
+    )
+    
+    # Aplicar el estilo condicional
+    for idx, row in df_vista.iterrows():
+        style = style_probabilidad(row['Probabilidad_Fuga_%'])
+        styled_df = styled_df.set_properties(
+            subset=[('Probabilidad_Fuga_%', idx)],
+            **{'background-color': style.split('background-color: ')[1].split(';')[0],
+               'color': style.split('color: ')[1].split(';')[0]}
+        )
+    
+    # Mostrar con estilos de tabla personalizados
+    st.markdown("""
+    <style>
+    .custom-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .custom-table thead th {
+        background-color: #1f77b4;
+        color: white;
+        padding: 10px;
+        font-weight: bold;
+        border: 1px solid #ddd;
+    }
+    .custom-table tbody tr {
+        background-color: #f8f9fa;
+    }
+    .custom-table tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+    .custom-table tbody td {
+        color: #000000;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    .custom-table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Mostrar la tabla
     st.dataframe(
         styled_df,
         hide_index=True,

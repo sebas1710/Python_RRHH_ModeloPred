@@ -7,21 +7,21 @@ st.set_page_config(page_title="Predicción de Fuga", page_icon="📉")
 # ====== ESTILOS ======
 st.markdown("""
 <style>
-[data-testid="stTable"] {
-    background-color: #ffffff;
-    color: #222;
-    border-radius: 12px;
-    box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
-    border: none;
+.scenario-row { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+.badge { font-size:16px; }
+.pill {
+  color:white;
+  padding:8px 14px;
+  border-radius:12px;
+  font-weight:600;
+  display:inline-block;
 }
-[data-testid="stTable"] thead tr th {
-    background-color: #0094d4 !important;
-    color: white !important;
-    font-weight: 600 !important;
-}
+.pill-verde { background:#155d2b; }
+.pill-amarillo { background:#a87900; }
+.pill-rojo { background:#7a1111; }
+.sep { height: 8px; }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ====== FUNCIONES ======
 def color_porcentaje(prob):
@@ -48,6 +48,15 @@ def calcular_probabilidad(base, aumento_salarial, aumento_cargo):
     cargo_valor = 1 if aumento_cargo == "Sí" else 0
     nueva_prob = base - 0.2 * (aumento_salarial / 100) - 0.1 * cargo_valor
     return max(min(nueva_prob, 1), 0)  # limitar entre 0 y 1
+
+def color_prob_html(prob):
+    if prob > 0.6:
+        bg = "#ffb3b3"
+    elif prob >= 0.4:
+        bg = "#ffe699"
+    else:
+        bg = "#b7e1cd"
+    return f"background-color:{bg}; color:black; font-weight:600;"
 
 # ====== CARGAR CSV ======
 df = pd.read_csv("INPUT/predicciones_fuga.csv")
@@ -85,39 +94,25 @@ if not df_filtrado.empty:
     df_vista = df_filtrado[["Nombre", "Área", "Probabilidad_Fuga_Base"]].copy()
     df_vista["Probabilidad_Fuga_%"] = (df_vista["Probabilidad_Fuga_Base"] * 100).round(1)
 
-    def highlight_prob(val):
-        if val > 60:
-            return 'background-color: #ff6b6b; color: #000000; font-weight: bold;'
-        elif val >= 40:
-            return 'background-color: #ffd93d; color: #000000; font-weight: bold;'
-        else:
-            return 'background-color: #6bcf7f; color: #000000; font-weight: bold;'
+    def fmt_pct(x):
+        try:
+            return f"{x:.1f}%".replace('.', ',')
+        except Exception:
+            return x
 
-    # Usar pandas Styler corregido
-    styled_df = df_vista.style\
-        .applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])\
-        .format({
-            "Probabilidad_Fuga_Base": "{:.4f}",
-            "Probabilidad_Fuga_%": "{:.1f}%"
-        })\
-        .set_table_styles([
-            {'selector': 'thead th',
-             'props': [('background-color', '#1f77b4'), 
-                      ('color', 'white'),
-                      ('font-weight', 'bold'),
-                      ('border', '1px solid white')]},
-            {'selector': 'tbody tr',
-             'props': [('background-color', '#f8f9fa'),
-                      ('color', '#000000')]},
-            {'selector': 'tbody tr:nth-child(even)',
-             'props': [('background-color', '#ffffff')]},
-            {'selector': 'td',
-             'props': [('border', '1px solid #dee2e6'),
-                      ('color', '#000000')]}
-        ])
+    def highlight_prob(val):
+        try:
+            if val > 60:
+                return "background-color:#ffb3b3; color:black"   # rojo claro
+            elif val >= 40:
+                return "background-color:#ffe699; color:black"   # amarillo
+            else:
+                return "background-color:#b7e1cd; color:black"   # verde
+        except Exception:
+            return ""
 
     st.dataframe(
-        styled_df,
+        df_vista.style.format({"Probabilidad_Fuga_%": fmt_pct}).applymap(highlight_prob, subset=["Probabilidad_Fuga_%"]),
         hide_index=True,
         use_container_width=True
     )
@@ -129,29 +124,92 @@ st.subheader("📊 Escenario actual")
 if not df_filtrado.empty:
     if len(df_filtrado) == 1:
         empleado = df_filtrado.iloc[0]
-        st.markdown(f"**Empleado:** {empleado['Nombre']}  |  **Área:** {empleado['Área']}")
+        st.markdown(f"### 👤 {empleado['Nombre']} — {empleado['Área']}")
         render_pill("Probabilidad de Fuga", empleado["Probabilidad_Fuga_Base"])
 
         st.markdown("---")
         st.subheader("🧩 Simulación de nuevos escenarios")
 
-        col1, col2 = st.columns(2)
-        col1.write(f"**Tuvo cambio de categoría LY:** {empleado['Aumento_CategoriaLY']}")
-        col2.write(f"**Salario actual:** {empleado['SalarioActual']}")
+        # Inicialización del estado de escenarios
+        if "escenarios" not in st.session_state:
+            st.session_state.escenarios = []
 
-        colA, colB = st.columns(2)
-        aumento_cargo = colA.selectbox("Aumento de Cargo (Sí/No)", ["No", "Sí"], key="aumento_cargo")
-        aumento_salarial = colB.number_input(
-            "Aumento Salarial (%)", min_value=0, max_value=50, value=5, step=1, key="aumento_salarial"
-        )
+        # Botones de control
+        col_add, col_reset = st.columns(2)
+        with col_add:
+            if st.button("➕ Agregar escenario"):
+                if len(st.session_state.escenarios) < 5:
+                    st.session_state.escenarios.append({"aumento_cargo": "No", "aumento_salarial": 5})
+                else:
+                    st.warning("Máximo 5 escenarios adicionales")
+        with col_reset:
+            if st.button("🔄 Reiniciar escenarios"):
+                st.session_state.escenarios = []
+                st.rerun()
 
-        nueva_prob = calcular_probabilidad(
-            empleado["Probabilidad_Fuga_Base"], aumento_salarial, aumento_cargo
-        )
+        # Inputs dinámicos
+        if st.session_state.escenarios:
+            for i, esc in enumerate(st.session_state.escenarios):
+                st.markdown(f"**Escenario {i+1}**")
+                c1, c2 = st.columns(2)
+                esc["aumento_cargo"] = c1.selectbox(
+                    f"Aumento de Cargo (Sí/No) {i+1}", ["No", "Sí"], key=f"cargo_{i}", index=0 if esc["aumento_cargo"]=="No" else 1
+                )
+                esc["aumento_salarial"] = c2.number_input(
+                    f"Aumento Salarial (%) {i+1}", min_value=0, max_value=50, value=int(esc["aumento_salarial"]), step=1, key=f"salario_{i}"
+                )
 
-        st.markdown("---")
-        st.subheader("📈 Resultado del nuevo escenario")
-        render_pill("Probabilidad de Fuga Ajustada", nueva_prob)
+            if st.button("🧮 Calcular escenarios"):
+                resultados = []
+                base_prob = empleado["Probabilidad_Fuga_Base"]
+
+                # Escenario base
+                resultados.append({
+                    "Escenario": "Base",
+                    "Aumento_Cargo": "-",
+                    "Aumento_Salarial_%": "-",
+                    "Probabilidad_Fuga": base_prob
+                })
+
+                for i, esc in enumerate(st.session_state.escenarios):
+                    nueva_prob = calcular_probabilidad(base_prob, esc["aumento_salarial"], esc["aumento_cargo"])
+                    resultados.append({
+                        "Escenario": f"Escenario {i+1}",
+                        "Aumento_Cargo": esc["aumento_cargo"],
+                        "Aumento_Salarial_%": f"{esc['aumento_salarial']}%",
+                        "Probabilidad_Fuga": nueva_prob
+                    })
+
+                df_resultados = pd.DataFrame(resultados)
+
+                def fmt_pct2(x):
+                    try:
+                        return f"{x*100:.1f}%".replace('.', ',')
+                    except:
+                        return x
+
+                def highlight_prob2(val):
+                    try:
+                        if val > 0.6:
+                            return "background-color:#ffb3b3; color:black"
+                        elif val >= 0.4:
+                            return "background-color:#ffe699; color:black"
+                        else:
+                            return "background-color:#b7e1cd; color:black"
+                    except:
+                        return ""
+
+                st.markdown("---")
+                st.subheader("📈 Resultados de los escenarios")
+                st.markdown(f"#### 👤 {empleado['Nombre']} — {empleado['Área']}")
+
+                st.dataframe(
+                    df_resultados.style
+                        .format({"Probabilidad_Fuga": fmt_pct2})
+                        .applymap(highlight_prob2, subset=["Probabilidad_Fuga"]),
+                    hide_index=True,
+                    use_container_width=True
+                )
 
     else:
         prom_fuga = df_filtrado["Probabilidad_Fuga_Base"].mean()

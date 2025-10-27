@@ -84,41 +84,37 @@ if not df_filtrado.empty:
     st.subheader("📋 Datos filtrados")
     df_vista = df_filtrado[["Nombre", "Área", "Probabilidad_Fuga_Base"]].copy()
     df_vista["Probabilidad_Fuga_%"] = (df_vista["Probabilidad_Fuga_Base"] * 100).round(1)
-    
-    # CSS personalizado para la tabla
-    st.markdown("""
-    <style>
-    .dataframe thead th {
-        background-color: #1f77b4 !important;
-        color: white !important;
-    }
-    .dataframe tbody tr {
-        background-color: #f8f9fa !important;
-        color: #000000 !important;
-    }
-    .dataframe tbody tr:nth-child(even) {
-        background-color: #ffffff !important;
-    }
-    .dataframe tbody td {
-        color: #000000 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Función para resaltar probabilidades
+
+    def fmt_pct(x):
+        try:
+            return f"{x:.1f}%".replace('.', ',')
+        except Exception:
+            return x
+
     def highlight_prob(val):
-        if val > 60:
-            return 'background-color: #ffb3b3; color: #000000;'
-        elif val >= 40:
-            return 'background-color: #ffe699; color: #000000;'
-        else:
-            return 'background-color: #b7e1cd; color: #000000;'
-    
-    st.dataframe(
-        df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"]),
-        hide_index=True,
-        use_container_width=True
+        try:
+            if val > 60:
+                return "background-color:#ffb3b3; color:black"   # rojo claro
+            elif val >= 40:
+                return "background-color:#ffe699; color:black"   # amarillo
+            else:
+                return "background-color:#b7e1cd; color:black"   # verde
+        except Exception:
+            return ""
+
+    styler = (
+        df_vista
+        .style
+        .format({"Probabilidad_Fuga_%": fmt_pct})
+        .applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])
+        .set_table_styles([
+            {"selector": "th", "props": [("background-color", "#0094d4"), ("color", "white"), ("font-weight", "600")]},
+            {"selector": "td", "props": [("background-color", "#f4f4f4"), ("color", "black")]},
+            {"selector": "tbody tr:hover td", "props": [("filter", "brightness(0.95)")]},
+        ])
     )
+
+    st.dataframe(styler, hide_index=True, use_container_width=True)
 
 # ====== ESCENARIO / RESUMEN ======
 st.markdown("---")
@@ -133,19 +129,16 @@ if not df_filtrado.empty:
         st.markdown("---")
         st.subheader("🧩 Simulación de nuevos escenarios")
 
-        # Datos base
         col1, col2 = st.columns(2)
         col1.write(f"**Tuvo cambio de categoría LY:** {empleado['Aumento_CategoriaLY']}")
         col2.write(f"**Salario actual:** {empleado['SalarioActual']}")
 
-        # Inputs para escenario
         colA, colB = st.columns(2)
         aumento_cargo = colA.selectbox("Aumento de Cargo (Sí/No)", ["No", "Sí"], key="aumento_cargo")
         aumento_salarial = colB.number_input(
             "Aumento Salarial (%)", min_value=0, max_value=50, value=5, step=1, key="aumento_salarial"
         )
 
-        # Calcular nueva probabilidad
         nueva_prob = calcular_probabilidad(
             empleado["Probabilidad_Fuga_Base"], aumento_salarial, aumento_cargo
         )

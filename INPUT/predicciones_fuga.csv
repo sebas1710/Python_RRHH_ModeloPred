@@ -1,10 +1,10 @@
-ID,Nombre,Área,Probabilidad_Fuga_Base,Aumento_Salarial_%,Aumento_Cargo,Probabilidad_Fuga_Final,Aumento_CategoriaLY,SalarioActual
-1,Ana Gómez,Auditoría,0.45,0,No,0.45,No,Medio
-2,Carlos Ruiz,Auditoría,0.3,0,No,0.3,Sí,Alto
-3,Lucía Ortega,Auditoría,0.6,0,No,0.6,No,Bajo
-4,Pedro Martín,Tax,0.35,0,No,0.35,No,Medio
-5,Sofía López,Tax,0.55,0,No,0.55,Sí,Bajo
-6,Andrés Navarro,Tax,0.4,0,No,0.4,No,Alto
-7,María Pérez,Legal,0.25,0,No,0.25,No,Medio
-8,David Romero,Legal,0.5,0,No,0.5,Sí,Alto
-9,Isabel Torres,Legal,0.65,0,No,0.65,No,Bajo
+ID,Nombre,Área,Probabilidad_Fuga_Base,Aumento_Salarial_%,Aumento_Cargo,Probabilidad_Fuga_Final,Aumento_CategoriaLY,SalarioActual,Liderazgo,Salario_Beneficios,Formacion
+1,Ana Gómez,Auditoría,0.45,0,No,0.45,No,Medio,3,4,3
+2,Carlos Ruiz,Auditoría,0.3,0,No,0.3,Sí,Alto,3,4,3
+3,Lucía Ortega,Auditoría,0.6,0,No,0.6,No,Bajo,3,4,3
+4,Pedro Martín,Tax,0.35,0,No,0.35,No,Medio,4,3,4
+5,Sofía López,Tax,0.55,0,No,0.55,Sí,Bajo,4,3,4
+6,Andrés Navarro,Tax,0.4,0,No,0.4,No,Alto,4,3,4
+7,María Pérez,Legal,0.25,0,No,0.25,No,Medio,2,3,2
+8,David Romero,Legal,0.5,0,No,0.5,Sí,Alto,2,3,2
+9,Isabel Torres,Legal,0.65,0,No,0.65,No,Bajo,2,3,2

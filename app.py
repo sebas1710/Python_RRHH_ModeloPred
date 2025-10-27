@@ -37,7 +37,7 @@ def render_pill(label, valor):
     st.markdown(
         f"""
         <div class="scenario-row">
-          <div class="pill {color}">Probabilidad de Fuga: {valor*100:.1f}%</div>
+          <div class="pill {color}">{label}: {valor*100:.1f}%</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -61,7 +61,7 @@ def highlight_prob(val):
         return ""
 
 # ====== CARGAR CSV ======
-df = pd.read_csv("INPUT/predicciones_fuga.csv")
+df = pd.read_csv("INPUT/predicciones_fuga_factores.csv")
 
 # ====== TABS ======
 tab1, tab2 = st.tabs(["👤 Análisis por Persona", "🏢 Análisis del Área"])
@@ -101,6 +101,12 @@ with tab1:
             hide_index=True,
             use_container_width=True
         )
+
+        # Mostrar promedio si hay varios empleados seleccionados
+        if len(df_filtrado) > 1:
+            prom_fuga = df_filtrado["Probabilidad_Fuga_Base"].mean()
+            st.markdown(f"**Selección:** {len(df_filtrado)} empleados")
+            render_pill("Promedio de Fuga", prom_fuga)
 
     st.markdown("---")
     st.subheader("📊 Escenario actual")

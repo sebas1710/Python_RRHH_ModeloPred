@@ -44,18 +44,13 @@ def render_pill(label, valor):
     )
     st.markdown('<div class="sep"></div>', unsafe_allow_html=True)
 
-def color_celda(val):
-    color = ""
-    if val > 0.6:
-        color = "background-color:#ffb3b3"
-    elif val >= 0.4:
-        color = "background-color:#ffe699"
-    else:
-        color = "background-color:#b7e1cd"
-    return color
+def calcular_probabilidad(base, aumento_salarial, aumento_cargo):
+    cargo_valor = 1 if aumento_cargo == "Sí" else 0
+    nueva_prob = base - 0.2 * (aumento_salarial / 100) - 0.1 * cargo_valor
+    return max(min(nueva_prob, 1), 0)  # limitar entre 0 y 1
 
 # ====== CARGAR CSV ======
-df = pd.read_csv("INPUT/predicciones_fuga.csv")
+df = pd.read_csv("INPUT/predicciones_fuga_actualizado.csv")
 
 # ====== SELECTORES ======
 st.title("📉 Modelo de Predicción de Fuga")
@@ -108,14 +103,38 @@ if not df_filtrado.empty:
 
 # ====== ESCENARIO / RESUMEN ======
 st.markdown("---")
-
-st.subheader("📊 Resumen del escenario actual")
+st.subheader("📊 Escenario actual")
 
 if not df_filtrado.empty:
     if len(df_filtrado) == 1:
         empleado = df_filtrado.iloc[0]
         st.markdown(f"**Empleado:** {empleado['Nombre']}  |  **Área:** {empleado['Área']}")
         render_pill("Probabilidad de Fuga", empleado["Probabilidad_Fuga_Base"])
+
+        st.markdown("---")
+        st.subheader("🧩 Simulación de nuevos escenarios")
+
+        # Datos base
+        col1, col2 = st.columns(2)
+        col1.write(f"**Tuvo cambio de categoría LY:** {empleado['Aumento_CategoriaLY']}")
+        col2.write(f"**Salario actual:** {empleado['SalarioActual']}")
+
+        # Inputs para escenario
+        colA, colB = st.columns(2)
+        aumento_cargo = colA.selectbox("Aumento de Cargo (Sí/No)", ["No", "Sí"], key="aumento_cargo")
+        aumento_salarial = colB.number_input(
+            "Aumento Salarial (%)", min_value=0, max_value=50, value=5, step=1, key="aumento_salarial"
+        )
+
+        # Calcular nueva probabilidad
+        nueva_prob = calcular_probabilidad(
+            empleado["Probabilidad_Fuga_Base"], aumento_salarial, aumento_cargo
+        )
+
+        st.markdown("---")
+        st.subheader("📈 Resultado del nuevo escenario")
+        render_pill("Probabilidad de Fuga Ajustada", nueva_prob)
+
     else:
         prom_fuga = df_filtrado["Probabilidad_Fuga_Base"].mean()
         st.markdown(f"**Selección:** {len(df_filtrado)} empleados")

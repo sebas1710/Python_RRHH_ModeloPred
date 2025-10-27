@@ -1,10 +1,10 @@
-ID,Nombre,Área,Probabilidad_Fuga_Base,Aumento_Salarial_%,Aumento_Cargo,Probabilidad_Fuga_Final
-1,Ana Gómez,Auditoría,0.45,0,No,0.45
-2,Carlos Ruiz,Auditoría,0.3,0,No,0.3
-3,Lucía Ortega,Auditoría,0.6,0,No,0.6
-4,Pedro Martín,Tax,0.35,0,No,0.35
-5,Sofía López,Tax,0.55,0,No,0.55
-6,Andrés Navarro,Tax,0.4,0,No,0.4
-7,María Pérez,Legal,0.25,0,No,0.25
-8,David Romero,Legal,0.5,0,No,0.5
-9,Isabel Torres,Legal,0.65,0,No,0.65
+ID,Nombre,Área,Probabilidad_Fuga_Base,Aumento_Salarial_%,Aumento_Cargo,Probabilidad_Fuga_Final,Aumento_CategoriaLY,SalarioActual
+1,Ana Gómez,Auditoría,0.45,0,No,0.45,No,Medio
+2,Carlos Ruiz,Auditoría,0.3,0,No,0.3,Sí,Alto
+3,Lucía Ortega,Auditoría,0.6,0,No,0.6,No,Bajo
+4,Pedro Martín,Tax,0.35,0,No,0.35,No,Medio
+5,Sofía López,Tax,0.55,0,No,0.55,Sí,Bajo
+6,Andrés Navarro,Tax,0.4,0,No,0.4,No,Alto
+7,María Pérez,Legal,0.25,0,No,0.25,No,Medio
+8,David Romero,Legal,0.5,0,No,0.5,Sí,Alto
+9,Isabel Torres,Legal,0.65,0,No,0.65,No,Bajo

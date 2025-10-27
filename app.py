@@ -85,38 +85,46 @@ if not df_filtrado.empty:
     df_vista = df_filtrado[["Nombre", "Área", "Probabilidad_Fuga_Base"]].copy()
     df_vista["Probabilidad_Fuga_%"] = (df_vista["Probabilidad_Fuga_Base"] * 100).round(1)
 
-    def fmt_pct(x):
-        try:
-            return f"{x:.1f}%".replace('.', ',')
-        except Exception:
-            return x
-
     def highlight_prob(val):
-        try:
-            if val > 60:
-                return "background-color:#ffb3b3; color:black"   # rojo claro
-            elif val >= 40:
-                return "background-color:#ffe699; color:black"   # amarillo
-            else:
-                return "background-color:#b7e1cd; color:black"   # verde
-        except Exception:
-            return ""
+        if val > 60:
+            return 'background-color: #ff6b6b; color: #000000; font-weight: bold;'
+        elif val >= 40:
+            return 'background-color: #ffd93d; color: #000000; font-weight: bold;'
+        else:
+            return 'background-color: #6bcf7f; color: #000000; font-weight: bold;'
 
-    styler = (
-        df_vista
-        .style
-        .format({"Probabilidad_Fuga_%": fmt_pct})
-        .applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])
+    # Usar pandas Styler con más control
+    styled_df = df_vista.style\
+        .applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])\
+        .set_properties(**{
+            'background-color': '#f8f9fa',
+            'color': '#000000',
+            'border-color': '#dee2e6'
+        }, subset=pd.IndexSlice[:, :])\
+        .set_properties(**{
+            'background-color': '#1f77b4',
+            'color': 'white',
+            'font-weight': 'bold'
+        }, subset=pd.IndexSlice[0, :])\
         .set_table_styles([
-            {"selector": "th", "props": [("background-color", "#0094d4"), ("color", "white"), ("font-weight", "600")]},
-            {"selector": "td", "props": [("background-color", "#f4f4f4"), ("color", "black")]},
-            {"selector": "tbody tr:hover td", "props": [("filter", "brightness(0.95)")]},
+            {'selector': 'thead th',
+             'props': [('background-color', '#1f77b4'), 
+                      ('color', 'white'),
+                      ('font-weight', 'bold'),
+                      ('border', '1px solid white')]},
+            {'selector': 'tbody tr',
+             'props': [('background-color', '#f8f9fa')]},
+            {'selector': 'tbody tr:nth-child(even)',
+             'props': [('background-color', '#ffffff')]},
+            {'selector': 'td',
+             'props': [('border', '1px solid #dee2e6')]}
         ])
-    )
 
-    # Mostrar tabla como HTML (mantiene estilos)
-    html_table = styler.to_html()
-    st.markdown(html_table, unsafe_allow_html=True)
+    st.dataframe(
+        styled_df,
+        hide_index=True,
+        use_container_width=True
+    )
 
 # ====== ESCENARIO / RESUMEN ======
 st.markdown("---")

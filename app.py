@@ -88,15 +88,36 @@ if not df_filtrado.empty:
     def highlight_prob(val):
         style = ""
         if val > 60:
-            style = "background-color:#ffb3b3"   # rojo claro
+            style = "background-color:#ffb3b3; color:#000000"   # rojo claro, texto negro
         elif val >= 40:
-            style = "background-color:#ffe699"   # amarillo
+            style = "background-color:#ffe699; color:#000000"   # amarillo, texto negro
         else:
-            style = "background-color:#b7e1cd"   # verde
+            style = "background-color:#b7e1cd; color:#000000"   # verde, texto negro
         return style
 
+    # Aplicar estilos a la tabla
+    styled_df = df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])\
+        .set_table_styles([
+            # Encabezados
+            {'selector': 'thead th',
+             'props': [('background-color', '#1f77b4'), 
+                      ('color', 'white'),
+                      ('font-weight', 'bold'),
+                      ('border', '1px solid white')]},
+            # Filas
+            {'selector': 'tbody tr',
+             'props': [('background-color', '#f8f9fa')]},
+            # Celdas del cuerpo
+            {'selector': 'tbody td',
+             'props': [('color', '#000000'),
+                      ('border', '1px solid #dee2e6')]},
+            # Hover effect
+            {'selector': 'tbody tr:hover',
+             'props': [('background-color', '#e9ecef')]}
+        ], overwrite=False)
+
     st.dataframe(
-        df_vista.style.applymap(highlight_prob, subset=["Probabilidad_Fuga_%"]),
+        styled_df,
         hide_index=True,
         use_container_width=True
     )

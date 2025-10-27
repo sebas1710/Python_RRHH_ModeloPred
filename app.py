@@ -93,19 +93,13 @@ if not df_filtrado.empty:
         else:
             return 'background-color: #6bcf7f; color: #000000; font-weight: bold;'
 
-    # Usar pandas Styler con más control
+    # Usar pandas Styler corregido
     styled_df = df_vista.style\
         .applymap(highlight_prob, subset=["Probabilidad_Fuga_%"])\
-        .set_properties(**{
-            'background-color': '#f8f9fa',
-            'color': '#000000',
-            'border-color': '#dee2e6'
-        }, subset=pd.IndexSlice[:, :])\
-        .set_properties(**{
-            'background-color': '#1f77b4',
-            'color': 'white',
-            'font-weight': 'bold'
-        }, subset=pd.IndexSlice[0, :])\
+        .format({
+            "Probabilidad_Fuga_Base": "{:.4f}",
+            "Probabilidad_Fuga_%": "{:.1f}%"
+        })\
         .set_table_styles([
             {'selector': 'thead th',
              'props': [('background-color', '#1f77b4'), 
@@ -113,11 +107,13 @@ if not df_filtrado.empty:
                       ('font-weight', 'bold'),
                       ('border', '1px solid white')]},
             {'selector': 'tbody tr',
-             'props': [('background-color', '#f8f9fa')]},
+             'props': [('background-color', '#f8f9fa'),
+                      ('color', '#000000')]},
             {'selector': 'tbody tr:nth-child(even)',
              'props': [('background-color', '#ffffff')]},
             {'selector': 'td',
-             'props': [('border', '1px solid #dee2e6')]}
+             'props': [('border', '1px solid #dee2e6'),
+                      ('color', '#000000')]}
         ])
 
     st.dataframe(

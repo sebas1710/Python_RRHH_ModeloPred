@@ -1,56 +1,54 @@
 import streamlit as st
 
-# --- Configuración inicial ---
 st.set_page_config(page_title="Simulador de Escenarios", page_icon="📊")
-
-st.title("📊 Simulador de escenarios de Precio × Cantidad")
+st.title("📊 Simulador de Escenarios")
 
 # --- Escenario base ---
-precio_base = 10
-cantidad_base = 200
-resultado_base = precio_base * cantidad_base
+PRECIO_DEF = 10.0
+CANT_DEF   = 200
 
+resultado_base = PRECIO_DEF * CANT_DEF
 st.subheader("Escenario base")
-st.write(f"💰 Precio: {precio_base}")
-st.write(f"📦 Cantidad: {cantidad_base}")
+st.write(f"💰 Precio: {PRECIO_DEF}")
+st.write(f"📦 Cantidad: {CANT_DEF}")
 st.success(f"Resultado: {resultado_base} €")
 
 st.markdown("---")
 
-# --- Control de número de escenarios ---
-if "num_escenarios" not in st.session_state:
-    st.session_state.num_escenarios = 0
+# --- Estado: lista de escenarios ---
+if "escenarios" not in st.session_state:
+    st.session_state.escenarios = []  # cada item: {"precio": float, "cantidad": int}
 
-col1, col2 = st.columns(2)
-with col1:
+# --- Botones de control ---
+c1, c2 = st.columns(2)
+with c1:
     if st.button("➕ Agregar nuevo escenario"):
-        if st.session_state.num_escenarios < 5:
-            st.session_state.num_escenarios += 1
+        if len(st.session_state.escenarios) < 5:
+            st.session_state.escenarios.append({"precio": PRECIO_DEF, "cantidad": CANT_DEF})
         else:
             st.warning("Solo puedes agregar hasta 5 escenarios adicionales.")
-
-with col2:
+with c2:
     if st.button("🔄 Reiniciar escenarios"):
-        st.session_state.num_escenarios = 0
-        st.session_state.pop("escenarios", None)
+        st.session_state.escenarios = []
         st.rerun()
 
-# --- Crear los inputs dinámicos ---
-st.subheader("Escenarios adicionales")
-
-if "escenarios" not in st.session_state:
-    st.session_state.escenarios = []
-
-for i in range(st.session_state.num_escenarios):
-    with st.container():
+# --- Inputs de escenarios (editar sin duplicar) ---
+if st.session_state.escenarios:
+    st.subheader("Escenarios adicionales")
+    for i, esc in enumerate(st.session_state.escenarios):
         st.write(f"**Escenario {i+1}**")
-        c1, c2 = st.columns(2)
-        precio = c1.number_input(f"Precio {i+1}", min_value=0.0, value=10.0, key=f"precio_{i}")
-        cantidad = c2.number_input(f"Cantidad {i+1}", min_value=0, value=200, key=f"cantidad_{i}")
-        st.session_state.escenarios.append({"precio": precio, "cantidad": cantidad})
+        colA, colB = st.columns(2)
+        nuevo_precio = colA.number_input(
+            f"Precio {i+1}", min_value=0.0, value=float(esc["precio"]), key=f"precio_{i}"
+        )
+        nueva_cant = colB.number_input(
+            f"Cantidad {i+1}", min_value=0, value=int(esc["cantidad"]), key=f"cantidad_{i}"
+        )
+        # Actualizamos en sitio, no hacemos append
+        st.session_state.escenarios[i]["precio"] = nuevo_precio
+        st.session_state.escenarios[i]["cantidad"] = nueva_cant
 
-# --- Calcular escenarios ---
-if st.session_state.num_escenarios > 0:
+    # --- Cálculo y salida ---
     if st.button("🧮 Calcular nuevos escenarios"):
         st.subheader("Resultados de los escenarios")
         for i, esc in enumerate(st.session_state.escenarios):

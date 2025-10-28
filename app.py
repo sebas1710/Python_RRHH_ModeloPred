@@ -71,6 +71,7 @@ tab1, tab2 = st.tabs(["👤 Análisis por Persona", "🏢 Análisis del Área"])
 # =====================================================================================
 with tab1:
     st.title("📉 Análisis por Persona")
+    st.header("Resultados y Simulaciones Individuales")
 
     col_area, col_persona = st.columns(2)
     areas = ["Todas"] + sorted(df["Área"].unique().tolist())
@@ -91,7 +92,7 @@ with tab1:
     st.markdown("---")
 
     if not df_filtrado.empty:
-        st.subheader("📋 Datos filtrados")
+        st.subheader("📋 Datos Filtrados")
         df_vista = df_filtrado[["Nombre", "Área", "Probabilidad_Fuga_Base"]].copy()
         df_vista["Probabilidad_Fuga_%"] = (df_vista["Probabilidad_Fuga_Base"] * 100).round(1)
 
@@ -109,7 +110,7 @@ with tab1:
             render_pill("Promedio de Fuga", prom_fuga)
 
     st.markdown("---")
-    st.subheader("📊 Escenario actual")
+    st.subheader("📊 Escenario Actual")
 
     if not df_filtrado.empty:
         if len(df_filtrado) == 1:
@@ -160,7 +161,9 @@ with tab1:
 # 🔵 TAB 2 - ANÁLISIS ESTRUCTURAL
 # =====================================================================================
 with tab2:
-    st.title("🏢 Análisis del Área - Factores Estructurales")
+    st.title("🏢 Análisis del Área")
+    st.header("Resultados y Simulaciones Estructurales")
+    #st.subheader("Valores base de la encuesta de clima")
 
     areas = sorted(df["Área"].unique().tolist())
     area_sel = st.selectbox("Selecciona un área:", areas, key="area_tab2")
@@ -207,5 +210,5 @@ with tab2:
             base_probs[f"Escenario {i+1}"] = (base_probs["Probabilidad_Fuga_Base"] + factor_total).clip(0, 1)
 
         st.markdown("---")
-        st.subheader(f"📈 Resultados por Empleado — {area_sel}")
+        st.subheader(f"📈 Nuevos Resultados por Empleado — {area_sel}")
         st.dataframe(base_probs.style.format({col: lambda x: f"{x*100:.1f}%".replace('.', ',') for col in base_probs.columns if col != "Nombre"}).applymap(lambda v: highlight_prob(v*100) if isinstance(v, float) else "", subset=[c for c in base_probs.columns if c != "Nombre"]), hide_index=True, use_container_width=True)

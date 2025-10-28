@@ -124,7 +124,7 @@ with tab1:
             if "escenarios" not in st.session_state:
                 st.session_state.escenarios = []
 
-            if st.button("🔄 Reiniciar escenarios"):
+            if st.button("🔄 Reiniciar Escenarios"):
                 st.session_state.escenarios = []
                 st.rerun()
 
@@ -137,14 +137,14 @@ with tab1:
 
             col_add, col_calc = st.columns([3, 1])
             with col_add:
-                if st.button("➕ Agregar escenario"):
+                if st.button("➕ Agregar Escenario"):
                     if len(st.session_state.escenarios) < 5:
                         st.session_state.escenarios.append({"aumento_cargo": "No", "aumento_salarial": 5})
                         st.rerun()
                     else:
-                        st.warning("Máximo 5 escenarios")
+                        st.warning("Máximo 5 Escenarios")
             with col_calc:
-                calcular = st.button("🧮 Calcular escenarios")
+                calcular = st.button("🧮 Calcular Escenarios")
 
             if calcular and st.session_state.escenarios:
                 res = []
@@ -179,9 +179,11 @@ with tab2:
     if "escenarios_area" not in st.session_state:
         st.session_state.escenarios_area = []
 
-    if st.button("🔄 Reiniciar escenarios", key="reset_area"):
-        st.session_state.escenarios_area = []
-        st.rerun()
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        if st.button("🔄 Reiniciar Escenarios", key="reset_area"):
+                st.session_state.escenarios_area = []
+                st.rerun()
 
     if st.session_state.escenarios_area:
         for i, esc in enumerate(st.session_state.escenarios_area):
@@ -193,7 +195,7 @@ with tab2:
 
     col_add, col_calc = st.columns([3, 1])
     with col_add:
-        if st.button("➕ Agregar escenario", key="add_area"):
+        if st.button("➕ Agregar Escenario", key="add_area"):
             if len(st.session_state.escenarios_area) < 5:
                 st.session_state.escenarios_area.append({
                     "Liderazgo": lid_base,
@@ -202,9 +204,9 @@ with tab2:
                 })
                 st.rerun()
             else:
-                st.warning("Máximo 5 escenarios")
+                st.warning("Máximo 5 Escenarios")
     with col_calc:
-        calcular_area = st.button("🧮 Calcular escenarios", key="calc_area")
+        calcular_area = st.button("🧮 Calcular Escenarios", key="calc_area")
 
     if calcular_area and st.session_state.escenarios_area:
         base_probs = df_area[["Nombre", "Probabilidad_Fuga_Base"]].copy()

@@ -124,9 +124,11 @@ with tab1:
             if "escenarios" not in st.session_state:
                 st.session_state.escenarios = []
 
-            if st.button("🔄 Reiniciar Escenarios"):
-                st.session_state.escenarios = []
-                st.rerun()
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🔄 Reiniciar Escenarios"):
+                    st.session_state.escenarios = []
+                    st.rerun()
 
             if st.session_state.escenarios:
                 for i, esc in enumerate(st.session_state.escenarios):

@@ -140,6 +140,7 @@ with tab1:
                 if st.button("➕ Agregar escenario"):
                     if len(st.session_state.escenarios) < 5:
                         st.session_state.escenarios.append({"aumento_cargo": "No", "aumento_salarial": 5})
+                        st.rerun()
                     else:
                         st.warning("Máximo 5 escenarios")
             with col_calc:
@@ -194,7 +195,12 @@ with tab2:
     with col_add:
         if st.button("➕ Agregar escenario", key="add_area"):
             if len(st.session_state.escenarios_area) < 5:
-                st.session_state.escenarios_area.append({"Liderazgo": lid_base, "Salario_Beneficios": sal_base, "Formacion": form_base})
+                st.session_state.escenarios_area.append({
+                    "Liderazgo": lid_base,
+                    "Salario_Beneficios": sal_base,
+                    "Formacion": form_base
+                })
+                st.rerun()
             else:
                 st.warning("Máximo 5 escenarios")
     with col_calc:
